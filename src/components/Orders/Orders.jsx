@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, DatePicker, Descriptions, Drawer, Flex, Form, Input, message, Modal, Popover, Select, Space, Spin, Table, Tag, Tooltip, Typography, Upload } from 'antd';
 import { useQuery } from '@tanstack/react-query';
+import { Tabs } from "antd";
 import axios from "../../api/axios";
 import {
   CheckCircleOutlined,
@@ -27,13 +28,14 @@ import moment from 'moment/moment';
 const { TextArea } = Input;
 import { notification } from 'antd';
 
-
+let dataSet=[];
 function Orders() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [passData, setPassData] = useState(null);
+  const [orderData,setOrderData] = useState(null);
   const { authUser } = useAuth();
-
+  
   const showModal = (data) => {
     setIsModalOpen(true);
     setPassData(data);
@@ -47,6 +49,9 @@ function Orders() {
   const getAllOrders = async () => {
     const response = await axios.get(GET_ALL_ORDERS_URL);
     // const filteredData = response.data.results.filter((item) => item.renter_company_id == authUser.CompanyId);
+    let orderRec=response.data.results;
+    dataSet=[orderRec.slice(0,3),orderRec.slice(3,6)];
+    setOrderData(dataSet[0]);
     return response.data.results;
   };
 
@@ -57,6 +62,8 @@ function Orders() {
   console.log("isPending: ", isPending);
   console.log("error: ", error);
   console.log("data: ", data);
+  //dataSet=[data.slice(0,2),data.slice(2,4)];
+  //setOrderData(dataSet[0]);
 
   if (isPending) return 'Loading Your Orders...'
 
@@ -64,9 +71,9 @@ function Orders() {
 
   const columns = [
     {
-      title: 'Order ID',
-      dataIndex: 'order_id',
-      key: 'order_id',
+      title: 'Quote ID',
+      dataIndex: 'quote_id',
+      key: 'quote_id',
       render: (text) => <a>{text}</a>,
     },
     {
@@ -146,32 +153,49 @@ function Orders() {
       render: (_, record) => (
         <Space size="middle">
           <Button type='primary' onClick={() => showModal(record)}>View</Button>
-          <Button type='primary' danger>Cancel</Button>
         </Space>
       ),
     },
   ];
 
   const refreshData = () => {
+    setOrderData(null);
     refetch();
   }
-
+  const selectTab= (key) => {
+    setOrderData(dataSet[key-1])
+    //  console.log("Quote     " ,quoteData,"    test   ...")
+  };
 
 
   return (
     <>
       <div className="container">
         <div className='row'>
-          <h5 class="card-title">My Orders</h5>
+          <h5 class="card-title">Orders</h5>
           <div className="col text-end">
             <Button type='link' onClick={refreshData} icon={<ReloadOutlined />}>Refresh Orders</Button>
           </div>
-          <div className="col-md-12">
-            <Table columns={columns} dataSource={data} />
-            {
-              isModalOpen && <ViewModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} handleOk={handleOk} handleCancel={handleCancel} items={passData} />
-            }
-          </div>
+          <Tabs
+                        defaultActiveKey="1"
+                        onChange={selectTab}
+                        type="card"
+                        size={2}
+                        items={['My Orders','Customer Orders'].map((tabText, i) => {
+                            const id = String(i + 1);
+                            return {
+                                label: tabText,
+                                key: id,
+                                children:<div className="col-md-12">
+                                <Table columns={columns} dataSource={orderData} />
+                                {
+                                  isModalOpen && <ViewModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} handleOk={handleOk} handleCancel={handleCancel} items={passData} />
+                                }
+                              </div>
+                            };
+                        })}
+                    />
+          
 
         </div>
       </div>
@@ -359,12 +383,12 @@ const ViewModal = ({ isModalOpen, setIsModalOpen, handleOk, handleCancel, items 
 
   const quoteItems = [
     {
-      label: 'Order ID',
+      label: 'Quote ID',
       span: {
         xl: 2,
         xxl: 2,
       },
-      children: items.order_id,
+      children: items.quote_id,
     },
     {
       label: 'Order Status',

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button, DatePicker, Descriptions, Form, Input, message, Modal, Space, Table, Tag, Typography } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import axios from "../../api/axios";
+import { Tabs } from "antd";
+import './quotes.scss';
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
@@ -45,10 +47,12 @@ const dummyData = [
         tags: ['cool', 'teacher'],
     },
 ];
+let dataSet=[];
 
 function Quotes() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [passData, setPassData] = useState(null);
+    const [quoteData,setQuoteData] = useState(null);
     const showModal = (data) => {
         setIsModalOpen(true);
         setPassData(data);
@@ -62,6 +66,10 @@ function Quotes() {
 
     const getAllQuotes = async () => {
         const response = await axios.get(GET_ALL_QUOTES_URL);
+        let quotes =response.data.result;
+        dataSet=[quotes.slice(0,8),quotes.slice(8,15)];
+        setQuoteData(dataSet[0]);
+        //console.log(dataSet);
         return response.data.result;
     };
 
@@ -69,14 +77,14 @@ function Quotes() {
         queryKey: ['allQuotes'], queryFn: getAllQuotes
     })
 
-    console.log("isPending: ", isPending);
-    console.log("error: ", error);
-    console.log("data: ", data);
+    //console.log("isPending: ", isPending);
+    //console.log("error: ", error);
+    //console.log("data: ", quoteData);
+    
 
     if (isPending) return 'Loading Your Quotes...'
-
     if (error) return message.error('An error has occurred: ' + error.message);
-
+ 
     const columns = [
         {
             title: 'Quote ID',
@@ -120,38 +128,59 @@ function Quotes() {
                 )
             },
         },
-        {
+        /* {
             title: 'Action',
             key: 'action',
             render: (_, record) => (
                 <Space size="middle">
                     <Button type='primary' onClick={() => showModal(record)}>View</Button>
-                    <Button type='primary' danger>Cancel</Button>
                 </Space>
             ),
-        },
+        }, */
     ];
 
     const refreshData = () => {
+        setQuoteData(null);
         getAllQuotes();
     }
 
-
+    
+    
+    const selectTab= (key) => {
+            setQuoteData(dataSet[key-1]);
+            //  console.log("Quote     " ,quoteData,"    test   ...")
+          };
+          
 
     return (
         <>
             <div className="container-fluid">
                 <div className='row'>
-                    <h5 class="card-title">Quotes</h5>
-                    <div className="col text-end">
+                <h5 class="card-title">Quotes</h5>
+                <div className="col text-end">
                         <Button type='link' onClick={refreshData} icon={<ReloadOutlined />}>Refresh Quotes</Button>
                     </div>
-                    <div className="col-md-12">
-                        <Table columns={columns} dataSource={data} />
-                        {
-                            isModalOpen && <ViewModal isModalOpen={isModalOpen} handleOk={handleOk} handleCancel={handleCancel} items={passData} refreshData={refreshData} />
-                        }
-                    </div>
+                    <Tabs
+                        defaultActiveKey="1"
+                        onChange={selectTab}
+                        type="card"
+                        size={2}
+                        items={['My Quotes','Customer Quotes'].map((tabText, i) => {
+                            const id = String(i + 1);
+                            return {
+                                label: tabText,
+                                key: id,
+                                children:
+                                    <div className="col-md-12" id="myQuotes">
+                                        <Table columns={columns} dataSource={quoteData} />
+                                        {
+                                            isModalOpen && <ViewModal isModalOpen={isModalOpen} handleOk={handleOk} handleCancel={handleCancel} items={passData} refreshData={refreshData} />
+                                        }
+                                    </div>
+                            };
+                        })}
+                    />
+                     
 
                 </div>
 
