@@ -534,7 +534,7 @@ function HirerShipmentPage() {
                                                                 </Form.Item>
                                                             </div>
 
-                                                            {!fileUrls[name] && <div className="col">
+                                                            <div className="col">
                                                                 <Form.Item
                                                                     {...restField}
                                                                     name={[name, 'image']}
@@ -543,7 +543,7 @@ function HirerShipmentPage() {
                                                                         title: 'Image file size should be maximum 2 MB (Type: .jpg, .png, .pdf)'
                                                                     }}
                                                                 >
-                                                                    <Upload
+                                                                    {/* <Upload
                                                                         valuePropName="file"
                                                                         getValueFromEvent={(e) => {
                                                                             if (Array.isArray(e)) {
@@ -558,20 +558,26 @@ function HirerShipmentPage() {
                                                                         showUploadList={false}
                                                                     >
                                                                         <Button loading={imageFileIsLoading[key]} type={'link'} icon={<UploadOutlined />}>{imageFileIsLoading[key] ? 'Uploading...' : 'Attach Image'} </Button>
-                                                                        {/* <p>Max: 2 MB (Accept jpg,jpeg,png Formats)</p> */}
-                                                                    </Upload>
+                                                                        
+                                                                    </Upload> */}
+                                                                    <FileUploader
+                                                                        maxCount={1}
+                                                                        acceptFile='.jpg,.jpeg,.png'
+                                                                        value={fileUrls[key] || []}
+                                                                        onChange={(fileList) => setFileUrls((prev) => ({ ...prev, [key]: fileList }))}
+                                                                    />
+
                                                                 </Form.Item>
                                                             </div>
-                                                            }
 
-                                                            {fileUrls[name] && (
+                                                            {/* {fileUrls[name] && (
                                                                 <div className='col-auto mt-4'>
                                                                     <div>
                                                                         <Link to={fileUrls[name]} target={'_blank'}>Preview File</Link>
                                                                         <Button type="link" onClick={() => handleFileRemove(name)}>Remove</Button>
                                                                     </div>
                                                                 </div>
-                                                            )}
+                                                            )} */}
                                                         </>
 
                                                         <div className="col-auto mt-4">
