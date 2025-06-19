@@ -259,7 +259,8 @@ function HirerShipmentPage() {
                 values.shipment_details.map(async (detail, index) => {
                     let updatedDetail = { ...detail };
                     if (fileUrls[index]) {
-                        updatedDetail.image = fileUrls[index];
+                        // console.log("fileUrls index: ", fileUrls[index][0].url);
+                        updatedDetail.image = fileUrls[index][0].url;
                     }
                     return updatedDetail;
                 })
@@ -268,9 +269,8 @@ function HirerShipmentPage() {
 
             const token = localStorage.getItem('authToken');
             axios.defaults.headers.common['authorization'] = 'Bearer ' + token;
-
             const shipmentRes = await axios.post(CREATE_SHIPMENT_URL, finalValues);
-            console.log("shipmentRes: ", shipmentRes);
+            // console.log("shipmentRes: ", shipmentRes);
             message.success(shipmentRes.data.message);
             navigate(-1); // redirect to previous page
 
