@@ -23,12 +23,12 @@ import moment from 'moment/moment';
 import { useAuth } from '../../../contexts/AuthContext';
 import axios from '../../../api/axios';
 import { formattedDateTime } from '../../../utils/utils';
-import { CREATE_SHIPMENT_URL, FILE_UPLOAD_URL, GET_SHIPMENT_BY_ORDERID_URL, UPDATE_SHIPMENT_URL } from '../../../api/apiUrls';
+import { CREATE_SHIPMENT_URL, GET_SHIPMENT_BY_ORDERID_URL, UPDATE_SHIPMENT_URL } from '../../../api/apiUrls';
 import { typesOfGoods, uomChoices } from '../../../utils/selectOptionUtils';
 import ShipmentDetails from '../ShipmentDetails/ShipmentDetails';
 import uploadFileToServer from '../../FileUploadComponent/uploadFileToServer';
 import FileUploadComponent from '../../FileUploadComponent/FileUploadComponent';
-
+import FileUploader from "../../FileUploadComponent/FileUploader";
 function HirerShipmentPage() {
     const location = useLocation();
     const { authUser } = useAuth();
@@ -53,7 +53,6 @@ function HirerShipmentPage() {
     const [imageFileIsLoading, setImageFileIsLoading] = useState({});
     const [fileIsLoading, setFileIsLoading] = useState(false);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-
     // if (!order) {
     //     return <div>No order data found!</div>;
     // }
@@ -150,20 +149,14 @@ function HirerShipmentPage() {
 
     // Image File Upload API
     const uploadImageFileToServer = async (file, name) => {
-        const formData = new FormData();
-        formData.append('fileName', file);
         try {
-            const response = await axios.post(FILE_UPLOAD_URL, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            const fileUrl = await uploadFileToServer(file);
             // console.log("response. file backblazedata: ", response.data);
             setFileUrls((prev) => ({
                 ...prev,
-                [name]: response.data.files[0].fileUrl,
+                [name]: fileUrl,
             }));
-            return response.data.files[0].fileUrl;
+            return fileUrl;
         } catch (error) {
             console.error("Error uploading file: ", error);
             message.error('File upload failed');
@@ -266,7 +259,8 @@ function HirerShipmentPage() {
                 values.shipment_details.map(async (detail, index) => {
                     let updatedDetail = { ...detail };
                     if (fileUrls[index]) {
-                        updatedDetail.image = fileUrls[index];
+                        // console.log("fileUrls index: ", fileUrls[index][0].url);
+                        updatedDetail.image = fileUrls[index][0].url;
                     }
                     return updatedDetail;
                 })
@@ -275,9 +269,8 @@ function HirerShipmentPage() {
 
             const token = localStorage.getItem('authToken');
             axios.defaults.headers.common['authorization'] = 'Bearer ' + token;
-
             const shipmentRes = await axios.post(CREATE_SHIPMENT_URL, finalValues);
-            console.log("shipmentRes: ", shipmentRes);
+            // console.log("shipmentRes: ", shipmentRes);
             message.success(shipmentRes.data.message);
             navigate(-1); // redirect to previous page
 
@@ -333,15 +326,23 @@ function HirerShipmentPage() {
         ),
     }));
 
-    const handleFileUpload = async (file, name) => {
-        setInvoiceFileLoading(true);
-        try {
-            const fileUrl = await uploadFileToServer(file, name);
-            console.log('Uploaded file URL:', fileUrl);
-            setInvoiceFile(fileUrl);
-            return fileUrl;
-        } finally {
-            setInvoiceFileLoading(false);
+    // const handleFileUpload = async (file, name) => {
+    //     setInvoiceFileLoading(true);
+    //     try {
+    //         const fileUrl = await uploadFileToServer(file, name);
+    //         console.log('Uploaded file URL:', fileUrl);
+    //         setInvoiceFile(fileUrl);
+    //         return fileUrl;
+    //     } finally {
+    //         setInvoiceFileLoading(false);
+    //     }
+    // };
+
+    const handleFileUpload = (files) => {
+        console.log("invoive files: ", files);
+        if (files.length > 0) {
+            // Assuming the first file's URL is what we want
+            setInvoiceFile(files[0].url);
         }
     };
 
@@ -412,10 +413,10 @@ function HirerShipmentPage() {
                                     },
                                 ]}
                             >
-                                <Flex gap="small" wrap>
+                                {/* <Flex gap="small" wrap>
                                     <FileUploadComponent
                                         accept=".pdf,.csv"
-                                        buttonText="Attach Invoice"
+                                        buttonText="Attach Invoice/Delivery Challan"
                                         loading={invoiceFileLoading}
                                         onFileUpload={handleFileUpload}
                                         handleRemoveFile={handleInvoiceRemove}
@@ -423,12 +424,18 @@ function HirerShipmentPage() {
                                     {invoiceFile && (
                                         <div className='col-auto'>
                                             <div>
-                                                <Link to={invoiceFile} target={'_blank'}>View Invoice File</Link>
+                                                <Link to={invoiceFile} target={'_blank'}>Preview Invoice File</Link>
                                             </div>
                                         </div>
                                     )}
 
-                                </Flex>
+                                </Flex> */}
+                                <FileUploader
+                                    acceptFile='.pdf,.xls,.xlsx,.csv'
+                                    value={invoiceFileList}
+                                    onChange={handleFileUpload}
+                                    maxCount={1}
+                                />
                             </Form.Item>
 
                         </div>
@@ -527,7 +534,7 @@ function HirerShipmentPage() {
                                                                 </Form.Item>
                                                             </div>
 
-                                                            {!fileUrls[name] && <div className="col">
+                                                            <div className="col">
                                                                 <Form.Item
                                                                     {...restField}
                                                                     name={[name, 'image']}
@@ -536,7 +543,7 @@ function HirerShipmentPage() {
                                                                         title: 'Image file size should be maximum 2 MB (Type: .jpg, .png, .pdf)'
                                                                     }}
                                                                 >
-                                                                    <Upload
+                                                                    {/* <Upload
                                                                         valuePropName="file"
                                                                         getValueFromEvent={(e) => {
                                                                             if (Array.isArray(e)) {
@@ -551,20 +558,26 @@ function HirerShipmentPage() {
                                                                         showUploadList={false}
                                                                     >
                                                                         <Button loading={imageFileIsLoading[key]} type={'link'} icon={<UploadOutlined />}>{imageFileIsLoading[key] ? 'Uploading...' : 'Attach Image'} </Button>
-                                                                        {/* <p>Max: 2 MB (Accept jpg,jpeg,png Formats)</p> */}
-                                                                    </Upload>
+                                                                        
+                                                                    </Upload> */}
+                                                                    <FileUploader
+                                                                        maxCount={1}
+                                                                        acceptFile='.jpg,.jpeg,.png'
+                                                                        value={fileUrls[key] || []}
+                                                                        onChange={(fileList) => setFileUrls((prev) => ({ ...prev, [key]: fileList }))}
+                                                                    />
+
                                                                 </Form.Item>
                                                             </div>
-                                                            }
 
-                                                            {fileUrls[name] && (
+                                                            {/* {fileUrls[name] && (
                                                                 <div className='col-auto mt-4'>
                                                                     <div>
-                                                                        <Link to={fileUrls[name]} target={'_blank'}>View File</Link>
+                                                                        <Link to={fileUrls[name]} target={'_blank'}>Preview File</Link>
                                                                         <Button type="link" onClick={() => handleFileRemove(name)}>Remove</Button>
                                                                     </div>
                                                                 </div>
-                                                            )}
+                                                            )} */}
                                                         </>
 
                                                         <div className="col-auto mt-4">

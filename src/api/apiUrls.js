@@ -2,6 +2,9 @@
 export const REGISTER_ACCOUNT_URL = "/registration/saveuser";
 export const CHECK_REGISTERED_USER = "/registration/userexists";
 
+//add employee
+export const ADD_EMPLOYEE = "/registration/addemployee";
+
 // login url
 export const LOGIN_URL = "/users/login";
 export const CURRENT_USER_URL = "/users/currentUser";
@@ -60,8 +63,13 @@ export const ADMIN_PASSWORD_CHANGE = "/users/updatepassword";
 export const SEARCH_TOOLS = "/tools/searchtools";
 export const SEARCH_SUGGESTIONS = "/tools/searchsuggestions";
 export const SAVE_TOOLS = "tools/savetools";
+export const EDIT_TOOL = "tools/updatetool";
 export const DELETE_TOOLS = "tools/deletetools";
 export const SAVE_FAVORITE = "/tools/addtofavorite";
 export const DELETE_FAVORITE = "/tools/deletefavorite";
 export const GET_TOOL_BY_ID = "/tools/gettoolbyid";
 export const GET_TOOLS_BY_COMPANY_ID = "/tools/gettoolsbycompanyid";
+export const ADD_TO_CART = "/cart/addtocart";
+export const GET_CART = "/cart/getcartitems";
+export const DELETE_CART = "/cart/removecartitem";
+export const GET_TOOLS_AUDIT = "/tools/gettoolsaudit";

@@ -14,6 +14,8 @@
   overflow: hidden;
   position:relative;
   min-width:250px;
+      border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 .img-repo-container{
   //border:1px solid red;
@@ -23,6 +25,12 @@
   //width:400%;
   transition: margin-left 0.5s;
   background:black;
+
+    font-weight: bold;
+    text-align: center;
+    color:rgb(114, 112, 112);
+    font-size:24px;
+
 }
 .Noimg-container{
   min-height:100px;
@@ -36,8 +44,6 @@
   width:100%;
   align-content: center;
   min-height:100px;
-  //border:1px solid blue;
-  //position:relative;
 }
  img{
  max-height: 90%;
@@ -69,21 +75,133 @@
     padding-top:2px;
  }
 
+ .tools_info_card{
+  display: block;
+
+  padding:0px;
+ }
+
  .titleCard{
-  margin-top:20px;
+  margin-top:10px;
+  border-radius:10px;
+  padding:10px;
+  border:1px solid grey;
+  margin-right:10px;
+  display: inline-block;
   width:100%;
  }
+
+ .seller_info{
+  margin-top:10px;
+  border-radius:10px;
+  padding:10px;
+  border:1px solid grey;
+  display: inline-block;
+ }
+
+ .pricing-info{
+  margin-top:10px;
+  border:1px solid grey;
+  border-radius:10px;
+  padding:10px;
+
+
+ }
+
  .detailsCardSpan{
   font-weight: bold;
  }
 
+ .additional-details{
+  margin-top:10px;
+  border:1px solid grey;
+  border-radius:10px;
+  padding:10px;
+ }
  .additional-details-content{
   overflow: scroll;
   overflow-x: hidden;
-  max-height:400px;
+  max-height:150px;
+  
  }
  .img-counter{
   text-align: center;
   color:white;
   background-color: black;
  }
+ .editIcon{
+  border:1px solid red;
+  display:block;
+ }
+ .inputFields{
+  width:120px;
+  height:25px;
+ }
+ .inputTextArea{
+  width:100%;
+  min-height:150px;
+ }
+ .btn_container{
+  display:block;
+  margin:0 auto;
+  margin-top:10px;
+  text-align: center;
+ }
+.audit-details {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.audit-details h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.audit-details hr {
+  border: 0;
+  height: 1px;
+  background: #ddd;
+  margin-bottom: 15px;
+}
+
+.audit-table-container {
+  overflow-x: auto; /* Ensures table is scrollable on small screens */
+}
+
+.audit-details table {
+  width: 100%;
+  border-collapse: collapse; /* Removes double borders */
+  margin-top: 10px;
+}
+
+.audit-details th,
+.audit-details td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap; /* Prevents text from wrapping in cells */
+}
+
+.audit-details th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  color: #555;
+}
+
+.audit-details tr:nth-child(even) {
+  background-color: #fdfdfd; /* Stripe rows for readability */
+}
+
+.audit-details tr:hover {
+  background-color: #f5f5f5; /* Highlight row on hover */
+}
+
+.audit-details p {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 15px;
+}

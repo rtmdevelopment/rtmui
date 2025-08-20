@@ -5,9 +5,11 @@ import { LeftCircleOutlined, InfoCircleOutlined, UploadOutlined } from '@ant-des
 const { RangePicker } = DatePicker;
 import axios from "../../api/axios";
 import HeaderTitle from '../../utils/HeaderTitle';
-import { FILE_UPLOAD_URL, QUOTE_SAVE_URL } from '../../api/apiUrls';
+import { QUOTE_SAVE_URL } from '../../api/apiUrls';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import uploadFileToServer from '../FileUploadComponent/uploadFileToServer';
+import FileUploader from "../FileUploadComponent/FileUploader";
 dayjs.extend(utc);
 const { TextArea } = Input;
 
@@ -44,21 +46,7 @@ function BookingMachines() {
     // steps 
     const [step, setStep] = useState(1);
     const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
-
-    const fileUpload = async (file) => {
-        try {
-            const configHeaders = {
-                headers: { "content-type": "multipart/form-data" },
-            };
-            const formData = new FormData();
-            formData.append("fileName", file.originFileObj);
-            var response = await axios.post(FILE_UPLOAD_URL, formData, configHeaders);
-            // console.log("responseFileData: ", response);
-            return response.data.files[0];
-        } catch (error) {
-            return error;
-        }
-    }
+    const [files, setFiles] = useState([]);
 
     const onOk = (value) => {
         // console.log('onOk: ', value);
@@ -104,137 +92,137 @@ function BookingMachines() {
         setLoading(false);
     };
 
-    const handlePartDrawingFileChange = async (info) => {
-        let fileList = [...info.fileList];
-        // Limit to only one file
-        fileList = fileList.slice(-1);
-        // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
-        // Display an error message if more than one file is uploaded
-        if (fileList.length > 1) {
-            message.error('You can only upload one file');
-        } else {
-            setPartDrawingFileList(fileList);
-            if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
-                setFileLoading(true);
-                setIsSubmitDisabled(true);
-                // update file upload api
-                const fileRes = await fileUpload(fileList[0]);
-                // console.log("fileRes: ", fileRes);
-                message.success("Part Drawing File Uploaded")
-                setViewPartDrawingFile(fileRes.fileUrl);
-                setFileLoading(false);
-                setIsSubmitDisabled(false);
+    // const handlePartDrawingFileChange = async (info) => {
+    //     let fileList = [...info.fileList];
+    //     // Limit to only one file
+    //     fileList = fileList.slice(-1);
+    //     // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
+    //     // Display an error message if more than one file is uploaded
+    //     if (fileList.length > 1) {
+    //         message.error('You can only upload one file');
+    //     } else {
+    //         setPartDrawingFileList(fileList);
+    //         if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
+    //             setFileLoading(true);
+    //             setIsSubmitDisabled(true);
+    //             // update file upload api
+    //             const fileUrl = await uploadFileToServer(fileList[0].originFileObj);
+    //             // console.log("fileRes: ", fileRes);
+    //             message.success("Part Drawing File Uploaded")
+    //             setViewPartDrawingFile(fileUrl);
+    //             setFileLoading(false);
+    //             setIsSubmitDisabled(false);
 
-            } else {
-                message.error('File size must less than 2 MB');
-            }
-        }
-    };
+    //         } else {
+    //             message.error('File size must less than 2 MB');
+    //         }
+    //     }
+    // };
 
-    const handleProcessSheetFileChange = async (info) => {
-        let fileList = [...info.fileList];
-        // Limit to only one file
-        fileList = fileList.slice(-1);
-        // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
-        // Display an error message if more than one file is uploaded
-        if (fileList.length > 1) {
-            message.error('You can only upload one file');
-        } else {
-            setProcessSheetFileList(fileList);
-            if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
-                setProcessFileLoading(true);
-                setIsSubmitDisabled(true);
-                // update file upload api
-                const fileRes = await fileUpload(fileList[0]);
-                // console.log("fileRes: ", fileRes);
-                message.success("Process Sheet File Uploaded!")
-                setViewProcessSheetFile(fileRes.fileUrl);
-                setProcessFileLoading(false);
-                setIsSubmitDisabled(false);
-            } else {
-                message.error('File size must less than 2 MB');
-            }
-        }
-    }
+    // const handleProcessSheetFileChange = async (info) => {
+    //     let fileList = [...info.fileList];
+    //     // Limit to only one file
+    //     fileList = fileList.slice(-1);
+    //     // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
+    //     // Display an error message if more than one file is uploaded
+    //     if (fileList.length > 1) {
+    //         message.error('You can only upload one file');
+    //     } else {
+    //         setProcessSheetFileList(fileList);
+    //         if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
+    //             setProcessFileLoading(true);
+    //             setIsSubmitDisabled(true);
+    //             // update file upload api
+    //             const fileUrl = await uploadFileToServer(fileList[0].originFileObj);
+    //             // console.log("fileRes: ", fileRes);
+    //             message.success("Process Sheet File Uploaded!")
+    //             setViewProcessSheetFile(fileUrl);
+    //             setProcessFileLoading(false);
+    //             setIsSubmitDisabled(false);
+    //         } else {
+    //             message.error('File size must less than 2 MB');
+    //         }
+    //     }
+    // }
 
-    const handleProgramSheetFileChange = async (info) => {
-        let fileList = [...info.fileList];
-        // Limit to only one file
-        fileList = fileList.slice(-1);
-        // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
-        // Display an error message if more than one file is uploaded
-        if (fileList.length > 1) {
-            message.error('You can only upload one file');
-        } else {
-            setProgramSheetFileList(fileList);
-            if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
-                setProgramFileLoading(true);
-                setIsSubmitDisabled(true);
-                // update file upload api
-                const fileRes = await fileUpload(fileList[0]);
-                // console.log("fileRes: ", fileRes);
-                message.success("Program Sheet File Uploaded!")
-                setViewProgramSheetFile(fileRes.fileUrl);
-                setProgramFileLoading(false);
-                setIsSubmitDisabled(false);
-            } else {
-                message.error('File size must less than 2 MB');
-            }
-        }
-    }
+    // const handleProgramSheetFileChange = async (info) => {
+    //     let fileList = [...info.fileList];
+    //     // Limit to only one file
+    //     fileList = fileList.slice(-1);
+    //     // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
+    //     // Display an error message if more than one file is uploaded
+    //     if (fileList.length > 1) {
+    //         message.error('You can only upload one file');
+    //     } else {
+    //         setProgramSheetFileList(fileList);
+    //         if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
+    //             setProgramFileLoading(true);
+    //             setIsSubmitDisabled(true);
+    //             // update file upload api
+    //             const fileUrl = await uploadFileToServer(fileList[0].originFileObj);
+    //             // console.log("fileRes: ", fileRes);
+    //             message.success("Program Sheet File Uploaded!")
+    //             setViewProgramSheetFile(fileUrl);
+    //             setProgramFileLoading(false);
+    //             setIsSubmitDisabled(false);
+    //         } else {
+    //             message.error('File size must less than 2 MB');
+    //         }
+    //     }
+    // }
 
-    const handleSpecsFileChange = async (info) => {
-        let fileList = [...info.fileList];
-        // Limit to only one file
-        fileList = fileList.slice(-1);
-        // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
-        // Display an error message if more than one file is uploaded
-        if (fileList.length > 1) {
-            message.error('You can only upload one file');
-        } else {
-            setSpecsFileList(fileList);
-            if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
-                setSpecsFileLoading(true);
-                setIsSubmitDisabled(true);
-                // update file upload api
-                const fileRes = await fileUpload(fileList[0]);
-                // console.log("fileRes: ", fileRes);
-                message.success("Specs/Standards File Uploaded!")
-                setViewSpecsFile(fileRes.fileUrl);
-                setSpecsFileLoading(false);
-                setIsSubmitDisabled(false);
-            } else {
-                message.error('File size must less than 2 MB');
-            }
-        }
-    }
+    // const handleSpecsFileChange = async (info) => {
+    //     let fileList = [...info.fileList];
+    //     // Limit to only one file
+    //     fileList = fileList.slice(-1);
+    //     // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
+    //     // Display an error message if more than one file is uploaded
+    //     if (fileList.length > 1) {
+    //         message.error('You can only upload one file');
+    //     } else {
+    //         setSpecsFileList(fileList);
+    //         if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
+    //             setSpecsFileLoading(true);
+    //             setIsSubmitDisabled(true);
+    //             // update file upload api
+    //             const fileUrl = await uploadFileToServer(fileList[0].originFileObj);
+    //             // console.log("fileRes: ", fileRes);
+    //             message.success("Specs/Standards File Uploaded!")
+    //             setViewSpecsFile(fileUrl);
+    //             setSpecsFileLoading(false);
+    //             setIsSubmitDisabled(false);
+    //         } else {
+    //             message.error('File size must less than 2 MB');
+    //         }
+    //     }
+    // }
 
 
-    const handleOthersFileChange = async (info) => {
-        let fileList = [...info.fileList];
-        // Limit to only one file
-        fileList = fileList.slice(-1);
-        // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
-        // Display an error message if more than one file is uploaded
-        if (fileList.length > 1) {
-            message.error('You can only upload one file');
-        } else {
-            setOthersFileList(fileList);
-            if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
-                setOthersFileLoading(true);
-                setIsSubmitDisabled(true);
-                // update file upload api
-                const fileRes = await fileUpload(fileList[0]);
-                // console.log("fileRes: ", fileRes);
-                message.success("Others File Uploaded!")
-                setViewOthersFile(fileRes.fileUrl);
-                setOthersFileLoading(false);
-                setIsSubmitDisabled(false);
-            } else {
-                message.error('File size must less than 2 MB');
-            }
-        }
-    }
+    // const handleOthersFileChange = async (info) => {
+    //     let fileList = [...info.fileList];
+    //     // Limit to only one file
+    //     fileList = fileList.slice(-1);
+    //     // console.log("size: ", fileList[0].size / 1024 / 1024 < 2);
+    //     // Display an error message if more than one file is uploaded
+    //     if (fileList.length > 1) {
+    //         message.error('You can only upload one file');
+    //     } else {
+    //         setOthersFileList(fileList);
+    //         if (fileList[0].size / 1024 / 1024 < 2) { // upto 2 MB upload size
+    //             setOthersFileLoading(true);
+    //             setIsSubmitDisabled(true);
+    //             // update file upload api
+    //             const fileUrl = await uploadFileToServer(fileList[0].originFileObj);
+    //             // console.log("fileRes: ", fileRes);
+    //             message.success("Others File Uploaded!")
+    //             setViewOthersFile(fileUrl);
+    //             setOthersFileLoading(false);
+    //             setIsSubmitDisabled(false);
+    //         } else {
+    //             message.error('File size must less than 2 MB');
+    //         }
+    //     }
+    // }
 
     const handlePartDrawingRemove = () => {
         setPartDrawingFileList([]);
@@ -264,6 +252,47 @@ function BookingMachines() {
         // Can not select days before today and today
         return current && current < dayjs().startOf('day');
     };
+
+    const handlePartDrawingFileChange = (files) => {
+        console.log("part draw files: ", files);
+        if (files.length > 0) {
+            // Assuming the first file's URL is what we want
+            setViewPartDrawingFile(files[0].url);
+        }
+    };
+
+    const handleProgramSheetFileChange = (files) => {
+        console.log("program sheet files: ", files);
+        if (files.length > 0) {
+            // Assuming the first file's URL is what we want
+            viewProgramSheetFile(files[0].url);
+        }
+    };
+
+    const handleProcessSheetFileChange = (files) => {
+        console.log("process sheet files: ", files);
+        if (files.length > 0) {
+            // Assuming the first file's URL is what we want
+            viewProcessSheetFile(files[0].url);
+        }
+    };
+
+    const handleSpecsFileChange = (files) => {
+        console.log("specs files: ", files);
+        if (files.length > 0) {
+            // Assuming the first file's URL is what we want
+            viewSpecsFile(files[0].url);
+        }
+    };
+
+    const handleOthersFileChange = (files) => {
+        console.log("others files: ", files);
+        if (files.length > 0) {
+            // Assuming the first file's URL is what we want
+            viewOthersFile(files[0].url);
+        }
+    };
+
 
     return (
         <>
@@ -383,28 +412,19 @@ function BookingMachines() {
                                             message: 'Please upload part drawing!',
                                         },
                                     ]}>
-                                        <Flex gap="small" wrap>
-                                            <Upload
-                                                fileList={partDrawingFileList}
-                                                onChange={handlePartDrawingFileChange}
-                                                maxCount={1}
-                                                beforeUpload={() => false}
-                                                onRemove={handlePartDrawingRemove}
-                                                data={(file) => file.fileName = "FOO"}
-                                            >
-                                                <Button loading={fileLoading} icon={<UploadOutlined />}>{fileLoading ? 'Uploading..' : 'Upload Part Drawing'}</Button>
-                                            </Upload>
-                                            {viewPartDrawingFile &&
-                                                <Link to={viewPartDrawingFile} target={'_blank'}>View Part Drawing File</Link>
-                                            }
-                                        </Flex>
 
+                                        <FileUploader
+                                            acceptFile='.pdf'
+                                            value={files}
+                                            onChange={handlePartDrawingFileChange}
+                                            maxCount={1}
+                                        />
                                     </Form.Item>
 
                                 </div>
                                 <div className="col-lg-6">
                                     <Form.Item label="Program Sheet" name={'orderprogramsheet'}>
-                                        <Flex gap="small" wrap>
+                                        {/* <Flex gap="small" wrap>
                                             <Upload
                                                 fileList={ProgramSheetFileList}
                                                 onChange={handleProgramSheetFileChange}
@@ -417,7 +437,13 @@ function BookingMachines() {
                                             {viewProgramSheetFile &&
                                                 <Link to={viewProgramSheetFile} target={'_blank'}>View Program Sheet File</Link>
                                             }
-                                        </Flex>
+                                        </Flex> */}
+                                        <FileUploader
+                                            acceptFile='.pdf'
+                                            value={ProgramSheetFileList}
+                                            onChange={handleProgramSheetFileChange}
+                                            maxCount={1}
+                                        />
                                     </Form.Item>
 
                                 </div>
@@ -426,7 +452,7 @@ function BookingMachines() {
                             <div className="row">
                                 <div className="col-lg-6">
                                     <Form.Item label="Process Sheet" name={'orderprocesssheet'}>
-                                        <Flex gap="small" wrap>
+                                        {/* <Flex gap="small" wrap>
                                             <Upload
                                                 fileList={ProcessSheetFileList}
                                                 onChange={handleProcessSheetFileChange}
@@ -439,13 +465,19 @@ function BookingMachines() {
                                             {viewProcessSheetFile &&
                                                 <Link to={viewProcessSheetFile} target={'_blank'}>View Process Sheet File</Link>
                                             }
-                                        </Flex>
+                                        </Flex> */}
+                                        <FileUploader
+                                            acceptFile='.pdf'
+                                            value={ProcessSheetFileList}
+                                            onChange={handleProcessSheetFileChange}
+                                            maxCount={1}
+                                        />
                                     </Form.Item>
 
                                 </div>
                                 <div className="col-lg-6">
                                     <Form.Item label="Specifications/Standards" name={'orderspec'}>
-                                        <Flex gap="small" wrap>
+                                        {/* <Flex gap="small" wrap>
                                             <Upload
                                                 fileList={specsFileList}
                                                 onChange={handleSpecsFileChange}
@@ -458,7 +490,13 @@ function BookingMachines() {
                                             {viewSpecsFile &&
                                                 <Link to={viewSpecsFile} target={'_blank'}>View Specs/Standards File</Link>
                                             }
-                                        </Flex>
+                                        </Flex> */}
+                                        <FileUploader
+                                            acceptFile='.pdf'
+                                            value={specsFileList}
+                                            onChange={handleSpecsFileChange}
+                                            maxCount={1}
+                                        />
                                     </Form.Item>
 
                                 </div>
@@ -467,7 +505,7 @@ function BookingMachines() {
                             <div className='row'>
                                 <div className="col-lg-6">
                                     <Form.Item label="Any other files if any" name={'otherattachments'}>
-                                        <Flex gap="small" wrap>
+                                        {/* <Flex gap="small" wrap>
                                             <Upload
                                                 fileList={othersFileList}
                                                 onChange={handleOthersFileChange}
@@ -480,7 +518,13 @@ function BookingMachines() {
                                             {viewOthersFile &&
                                                 <Link to={viewOthersFile} target={'_blank'}>View Others File</Link>
                                             }
-                                        </Flex>
+                                        </Flex> */}
+                                        <FileUploader
+                                            acceptFile='.pdf'
+                                            value={othersFileList}
+                                            onChange={handleOthersFileChange}
+                                            maxCount={1}
+                                        />
                                     </Form.Item>
 
                                 </div>
